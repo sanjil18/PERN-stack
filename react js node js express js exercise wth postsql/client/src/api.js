@@ -28,3 +28,5 @@ export const apiRequest = async (path, options = {}) => {
 
   return payload;
 };
+
+export { API_BASE_URL };

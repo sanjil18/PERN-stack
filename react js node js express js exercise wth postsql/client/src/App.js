@@ -8,7 +8,10 @@ import { apiRequest } from './api';
 const STORAGE_KEY = 'pern-stack-auth-token';
 
 function App() {
-  const [authToken, setAuthToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+  const [authToken, setAuthToken] = useState(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    return queryParams.get('token') || localStorage.getItem(STORAGE_KEY) || '';
+  });
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -18,9 +21,59 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  const [socialProviders, setSocialProviders] = useState({
+    googleConfigured: false,
+  });
 
   const isAuthenticated = useMemo(() => Boolean(authToken && currentUser), [authToken, currentUser]);
   const isAdmin = currentUser?.role === 'admin';
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadSocialProviders = async () => {
+      try {
+        const providers = await apiRequest('/auth/providers');
+        if (!ignore) {
+          setSocialProviders(providers);
+        }
+      } catch {
+        if (!ignore) {
+          setSocialProviders({ googleConfigured: false });
+        }
+      }
+    };
+
+    loadSocialProviders();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const tokenFromQuery = url.searchParams.get('token');
+    const authErrorFromQuery = url.searchParams.get('auth_error');
+    let changed = false;
+
+    if (tokenFromQuery) {
+      localStorage.setItem(STORAGE_KEY, tokenFromQuery);
+      setAuthToken(tokenFromQuery);
+      url.searchParams.delete('token');
+      changed = true;
+    }
+
+    if (authErrorFromQuery) {
+      setError('Google social login could not complete. Please use email and password, or check the OAuth settings.');
+      url.searchParams.delete('auth_error');
+      changed = true;
+    }
+
+    if (changed) {
+      window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+    }
+  }, []);
 
   const clearSession = () => {
     localStorage.removeItem(STORAGE_KEY);
@@ -328,6 +381,7 @@ function App() {
           error={error}
           status={status}
           busy={busy}
+          socialProviders={socialProviders}
           onLogin={handleLogin}
           onRegister={handleRegister}
         />

@@ -190,6 +190,64 @@
   min-height: 46px;
 }
 
+.social-login-block {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.social-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.social-divider::before,
+.social-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.social-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.social-hint {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.social-button {
+  border: 0;
+  border-radius: 14px;
+  min-height: 46px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.google-button {
+  color: #08111f;
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+}
+
+.facebook-button {
+  color: #ffffff;
+  background: linear-gradient(135deg, #1877f2 0%, #0f5bd7 100%);
+}
+
 .ghost-button,
 .link-button {
   color: #ffffff;
@@ -214,7 +272,8 @@
 .ghost-button:hover,
 .danger-button:hover,
 .link-button:hover,
-.tab-button:hover {
+.tab-button:hover,
+.social-button:hover {
   transform: translateY(-1px);
 }
 
@@ -462,6 +521,10 @@
   }
 
   .inline-form {
+    grid-template-columns: 1fr;
+  }
+
+  .social-buttons {
     grid-template-columns: 1fr;
   }
 

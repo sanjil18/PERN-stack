@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { API_BASE_URL } from '../api';
 
-const AuthPanel = ({ error, status, busy, onLogin, onRegister }) => {
+const AuthPanel = ({ error, status, busy, onLogin, onRegister, socialProviders = {} }) => {
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [localError, setLocalError] = useState('');
+
+  const providerButtons = useMemo(
+    () => [
+      { key: 'google', label: 'Google', className: 'google-button', available: socialProviders.googleConfigured },
+    ],
+    [socialProviders.googleConfigured]
+  );
 
   const updateField = (field) => (event) => {
     setLocalError('');
@@ -15,6 +23,12 @@ const AuthPanel = ({ error, status, busy, onLogin, onRegister }) => {
     setLocalError('');
     setForm({ name: '', email: '', password: '', confirmPassword: '' });
   };
+
+  const startSocialLogin = (provider) => {
+    window.location.assign(`${API_BASE_URL}/auth/${provider}`);
+  };
+
+  const anySocialProviderConfigured = providerButtons.some((provider) => provider.available);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -124,6 +138,31 @@ const AuthPanel = ({ error, status, busy, onLogin, onRegister }) => {
             {busy ? 'Working...' : mode === 'register' ? 'Create account' : 'Log in'}
           </button>
         </form>
+
+        {mode === 'login' ? (
+          <div className="social-login-block">
+            <div className="social-divider">or log in with Google</div>
+            <div className="social-buttons">
+              {providerButtons.map((provider) => (
+                <button
+                  key={provider.key}
+                  type="button"
+                  className={`social-button ${provider.className}`}
+                  onClick={() => startSocialLogin(provider.key)}
+                  disabled={busy || !provider.available}
+                >
+                  {provider.label}
+                </button>
+              ))}
+            </div>
+            {!anySocialProviderConfigured ? (
+              <div className="social-hint">
+                Google social login is disabled until Google OAuth credentials are added to the
+                server environment.
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         {localError ? <div className="feedback-banner error">{localError}</div> : null}
         {error ? <div className="feedback-banner error">{error}</div> : null}
