@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useMemo, useState } from 'react';
 import { API_BASE_URL } from '../api';
 
@@ -8,9 +9,10 @@ const AuthPanel = ({ error, status, busy, onLogin, onRegister, socialProviders =
 
   const providerButtons = useMemo(
     () => [
-      { key: 'google', label: 'Google', className: 'google-button', available: socialProviders.googleConfigured },
+      { key: 'google', label: 'Continue with Google', className: 'google-button', available: socialProviders.googleConfigured },
+      { key: 'facebook', label: 'Continue with Facebook', className: 'facebook-button', available: socialProviders.facebookConfigured },
     ],
-    [socialProviders.googleConfigured]
+    [socialProviders.googleConfigured, socialProviders.facebookConfigured]
   );
 
   const updateField = (field) => (event) => {
@@ -25,26 +27,22 @@ const AuthPanel = ({ error, status, busy, onLogin, onRegister, socialProviders =
   };
 
   const startSocialLogin = (provider) => {
-    window.location.assign(`${API_BASE_URL}/auth/${provider}`);
+    globalThis.location.assign(`${API_BASE_URL}/auth/${provider}`);
   };
 
-  const anySocialProviderConfigured = providerButtons.some((provider) => provider.available);
+  const anySocialProviderConfigured = providerButtons.some((p) => p.available);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLocalError('');
 
-    const payload = {
-      email: form.email.trim(),
-      password: form.password,
-    };
+    const payload = { email: form.email.trim(), password: form.password };
 
     if (mode === 'register') {
       if (form.password !== form.confirmPassword) {
         setLocalError('Passwords do not match.');
         return;
       }
-
       payload.name = form.name.trim();
       await onRegister(payload);
     } else {
@@ -135,13 +133,14 @@ const AuthPanel = ({ error, status, busy, onLogin, onRegister, socialProviders =
           ) : null}
 
           <button className="primary-button" type="submit" disabled={busy}>
-            {busy ? 'Working...' : mode === 'register' ? 'Create account' : 'Log in'}
+            {/* eslint-disable-next-line no-nested-ternary */}
+            {busy ? 'Working…' : mode === 'register' ? 'Create account' : 'Log in'}
           </button>
         </form>
 
         {mode === 'login' ? (
           <div className="social-login-block">
-            <div className="social-divider">or log in with Google</div>
+            <div className="social-divider">or continue with</div>
             <div className="social-buttons">
               {providerButtons.map((provider) => (
                 <button
@@ -150,17 +149,17 @@ const AuthPanel = ({ error, status, busy, onLogin, onRegister, socialProviders =
                   className={`social-button ${provider.className}`}
                   onClick={() => startSocialLogin(provider.key)}
                   disabled={busy || !provider.available}
+                  title={!provider.available ? `${provider.label} is not configured` : undefined}
                 >
                   {provider.label}
                 </button>
               ))}
             </div>
-            {!anySocialProviderConfigured ? (
+            {anySocialProviderConfigured ? null : (
               <div className="social-hint">
-                Google social login is disabled until Google OAuth credentials are added to the
-                server environment.
+                Social login (Google &amp; Facebook) is disabled until OAuth credentials are added to the server environment.
               </div>
-            ) : null}
+            )}
           </div>
         ) : null}
 
