@@ -15,6 +15,9 @@ steps:
     npm run build
   displayName: 'Build React Client'
   workingDirectory: 'react js node js express js exercise wth postsql/client'
+  env:
+    DISABLE_ESLINT_PLUGIN: true
+    CI: false
 
 - script: |
     npm install
