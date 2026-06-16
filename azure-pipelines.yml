@@ -13,5 +13,10 @@ steps:
 - script: |
     npm install
     npm run build
-  displayName: 'npm install and build'
-  workingDirectory: 'react js node js express js exercise wth postsql'
+  displayName: 'Build React Client'
+  workingDirectory: 'react js node js express js exercise wth postsql/client'
+
+- script: |
+    npm install
+  displayName: 'Install Server Dependencies'
+  workingDirectory: 'react js node js express js exercise wth postsql/server'
