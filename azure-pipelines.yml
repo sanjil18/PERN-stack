@@ -1,0 +1,25 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'Build React Client'
+  workingDirectory: 'react js node js express js exercise wth postsql/client'
+  env:
+    DISABLE_ESLINT_PLUGIN: true
+    CI: false
+
+- script: |
+    npm install
+  displayName: 'Install Server Dependencies'
+  workingDirectory: 'react js node js express js exercise wth postsql/server'
