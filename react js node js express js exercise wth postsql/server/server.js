@@ -527,7 +527,6 @@ app.delete('/users/:id', authenticateToken, loadCurrentUser, async (req, res) =>
         const userId = Number(req.params.id);
         if (!canAccessUser(req, userId)) return res.status(403).json({ error: 'You can only delete your own account' });
 
-        // Clean up local avatar file
         const old = await pool.query('SELECT avatar_url FROM users WHERE user_id = $1', [userId]);
         const oldUrl = old.rows[0]?.avatar_url;
         if (oldUrl && oldUrl.startsWith('/uploads/')) {
@@ -542,7 +541,6 @@ app.delete('/users/:id', authenticateToken, loadCurrentUser, async (req, res) =>
     }
 });
 
-// Avatar upload
 app.post('/users/:id/avatar', authenticateToken, loadCurrentUser, (req, res, next) => {
     upload.single('avatar')(req, res, (err) => {
         if (err instanceof multer.MulterError) {
@@ -557,7 +555,6 @@ app.post('/users/:id/avatar', authenticateToken, loadCurrentUser, (req, res, nex
         if (!canAccessUser(req, userId)) return res.status(403).json({ error: 'You can only update your own avatar' });
         if (!req.file) return res.status(400).json({ error: 'No image file provided' });
 
-        // Delete old local avatar
         const old = await pool.query('SELECT avatar_url FROM users WHERE user_id = $1', [userId]);
         const oldUrl = old.rows[0]?.avatar_url;
         if (oldUrl && oldUrl.startsWith('/uploads/')) {
@@ -578,7 +575,6 @@ app.post('/users/:id/avatar', authenticateToken, loadCurrentUser, (req, res, nex
     }
 });
 
-// Avatar remove
 app.delete('/users/:id/avatar', authenticateToken, loadCurrentUser, async (req, res) => {
     try {
         const userId = Number(req.params.id);
